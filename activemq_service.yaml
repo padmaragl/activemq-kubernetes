@@ -6,12 +6,28 @@ spec:
   selector:
     app: activemq-kubernetes
   ports:
-  - name: http
+  - name: admin
     protocol: TCP
     port: 8161
     targetPort: 8161
-  - name: https
+  - name: broker
     protocol: TCP
     port: 61616
     targetPort: 61616
+  - name: amqp
+    protocol: TCP
+    port: 5672
+    targetPort: 5672
+  - name: stomp
+    protocol: TCP
+    port: 61613
+    targetPort: 61613
+  - name: mqtt
+    protocol: TCP
+    port: 1883
+    targetPort: 1883
+  - name: websocket
+    protocol: TCP
+    port: 61614
+    targetPort: 61614
   type: LoadBalancer

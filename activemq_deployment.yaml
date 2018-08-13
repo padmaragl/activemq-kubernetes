@@ -18,9 +18,15 @@ spec:
         - image: padmaraglaunchpad/activemq-kubernetes:latest
           name: activemq-kubernetes
           ports:
-        - containerPort: 8161
-        - containerPort: 61616
-        - containerPort: 5672
-        - containerPort: 61613
-        - containerPort: 1883
-        - containerPort: 61614
+            - containerPort: 8161
+              name: admin
+            - containerPort: 61616
+              name: broker
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 61613
+              name: stomp
+            - containerPort: 1883
+              name: mqtt
+            - containerPort: 61614
+              name: websocket
