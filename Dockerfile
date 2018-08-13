@@ -46,7 +46,7 @@ RUN \
     adduser -g "${USER} user" -D -h ${APP_HOME} -G ${GROUP} -s /bin/sh -u ${UID} ${USER}
 
 
-ADD root /
+# ADD /root /
 RUN \
     chown -R ${USER}:${GROUP} ${APP_HOME} &&\
     chown -R ${USER}:${GROUP} /data &&\

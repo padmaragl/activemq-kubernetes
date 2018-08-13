@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: activemq-kubernetes
+  labels:
+    app: activemq-kubernetes
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: activemq-kubernetes
+  template:
+    metadata:
+      labels:
+        app: activemq-kubernetes
+    spec:
+      containers:
+        - image: padmaraglaunchpad/activemq-kubernetes:latest
+          name: activemq-kubernetes
+          ports:
+        - containerPort: 8161
+        - containerPort: 61616
+        - containerPort: 5672
+        - containerPort: 61613
+        - containerPort: 1883
+        - containerPort: 61614

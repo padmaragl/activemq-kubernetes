@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: activemq-kubernetes
+spec:
+  selector:
+    app: activemq-kubernetes
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8161
+    targetPort: 8161
+  - name: https
+    protocol: TCP
+    port: 61616
+    targetPort: 61616
+  type: LoadBalancer
