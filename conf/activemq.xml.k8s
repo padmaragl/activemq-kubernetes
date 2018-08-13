@@ -39,7 +39,16 @@
     -->
     <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}">
 	
-		<destinationPolicy>
+		<networkConnectors>
+			<!-- We're creating a network of brokers, but in kubernetes cluster-->
+			<networkConnector uri="k8s://default?podLabelKey=app&amp;podLabelValue=activemq"			
+				dynamicOnly="true"
+				networkTTL="3"
+				prefetchSize="1"
+				decreaseNetworkConsumerPriority="true" />
+		</networkConnectors>
+
+        <destinationPolicy>
             <policyMap>
               <policyEntries>
                 <policyEntry topic=">" >
