@@ -1,10 +1,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: activemq-kubernetes
+  name: activemq
 spec:
   selector:
-    app: activemq-kubernetes
+    app: activemq
   ports:
   - name: admin
     protocol: TCP

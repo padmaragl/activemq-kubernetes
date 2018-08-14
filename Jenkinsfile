@@ -18,16 +18,16 @@ node {
    }
    
    stage('Dockerize Build'){
-      sh "sudo docker build -t activemq-kubernetes ."
-      sh "sudo docker tag activemq-kubernetes padmaraglaunchpad/activemq-kubernetes:latest"
-      sh "sudo docker push padmaraglaunchpad/activemq-kubernetes:latest"
+      sh "sudo docker build -t activemq ."
+      sh "sudo docker tag activemq-kubernetes padmaraglaunchpad/activemq:latest"
+      sh "sudo docker push padmaraglaunchpad/activemq:latest"
    }
    
    stage('Kubernetes Deploy') {
       //Kubernetes - create deployment and service
       
-      sh "kubectl delete service activemq-kubernetes || true"
-      sh "kubectl delete deployment activemq-kubernetes || true"
+      sh "kubectl delete service activemq || true"
+      sh "kubectl delete deployment activemq || true"
       
       sh "kubectl apply -f activemq_deployment.yaml"
       sh "kubectl apply -f activemq_service.yaml"
