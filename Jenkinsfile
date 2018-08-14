@@ -29,6 +29,7 @@ node {
       sh "kubectl delete service activemq || true"
       sh "kubectl delete deployment activemq || true"
       
+	  sh "kubectl apply -f create_user_role_binding.yaml"
       sh "kubectl apply -f activemq_deployment.yaml"
       sh "kubectl apply -f activemq_service.yaml"
    }
