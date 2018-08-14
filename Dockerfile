@@ -37,4 +37,4 @@ USER activemq
 WORKDIR $ACTIVEMQ_HOME
 EXPOSE $ACTIVEMQ_TCP $ACTIVEMQ_AMQP $ACTIVEMQ_STOMP $ACTIVEMQ_MQTT $ACTIVEMQ_WS $ACTIVEMQ_UI
 
-CMD ["/bin/sh", "-c", "bin/activemq console", "-DbrokerName=$K8S_HOST_NAME"]
+CMD ["/bin/sh", "-c", "bin/activemq console"]
