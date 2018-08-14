@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - env:
-          - name: K8S_HOST_NAME
-              valueFrom:
-                nodeFieldRef:
-                  fieldPath: spec.nodeName
+          name: K8S_HOST_NAME
+          valueFrom:
+            nodeFieldRef:
+              fieldPath: spec.nodeName
         - image: padmaraglaunchpad/activemq:latest
           name: activemq
           ports:
