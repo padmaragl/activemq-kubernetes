@@ -17,6 +17,12 @@ node {
       mvnHome = tool 'M3'
    }
    
+   stage('Dockerize Build'){
+      sh "sudo docker build -t activemq ."
+      sh "sudo docker tag activemq-kubernetes padmaraglaunchpad/activemq:latest"
+      sh "sudo docker push padmaraglaunchpad/activemq:latest"
+   }
+   
    stage('Kubernetes Deploy') {
       //Kubernetes - create deployment and service
       
