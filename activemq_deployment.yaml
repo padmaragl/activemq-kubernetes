@@ -15,11 +15,6 @@ spec:
         app: activemq
     spec:
       containers:
-        - env:
-          name: K8S_HOST_NAME
-          valueFrom:
-            nodeFieldRef:
-              fieldPath: spec.nodeName
         - image: padmaraglaunchpad/activemq:latest
           name: activemq
           ports:
@@ -35,4 +30,9 @@ spec:
               name: mqtt
             - containerPort: 61614
               name: websocket
+          env:
+            - name: K8S_HOST_NAME
+              valueFrom:
+                nodeFieldRef:
+                  fieldPath: spec.nodeName
           
