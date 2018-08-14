@@ -1,66 +1,39 @@
-FROM alpine:3.6
-MAINTAINER Padmarag Lokhande (padmarag.lokhande@gmail.com)
+FROM openjdk:8-jre-alpine
 
-# Application settings
-ENV CONFD_PREFIX_KEY="/activemq" \
-    CONFD_BACKEND="env" \
-    CONFD_INTERVAL="60" \
-    CONFD_NODES="" \
-    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
-    LANG="en_US.utf8" \
-    APP_HOME="/opt/activemq" \
-    APP_VERSION="5.15.5" \
-    SCHEDULER_VOLUME="/opt/scheduler" \
-    USER=activemq \
-    GROUP=activemq \
-    UID=10003 \
-    GID=10003 \
-    CONTAINER_NAME="alpine-activemq" \
-    CONTAINER_AUTHOR="Padmarag Lokhande <padmarag.lokhande@gmail.com>" \
-    CONTAINER_SUPPORT="https://github.com/disaster37/alpine-gocd-agent/issues" \
-    APP_WEB="http://activemq.apache.org/"
+ENV ACTIVEMQ_VERSION 5.15.4
+ENV ACTIVEMQ apache-activemq-$ACTIVEMQ_VERSION
+ENV ACTIVEMQ_TCP=61616 ACTIVEMQ_AMQP=5672 ACTIVEMQ_STOMP=61613 ACTIVEMQ_MQTT=1883 ACTIVEMQ_WS=61614 ACTIVEMQ_UI=8161
+ENV SHA512_VAL=26d8154fcfe17ab90508b3b9d46b40815404fa3886cfdc4eae4b06086332203bd2455475b9309ccabd76d0c9b65f523f9d3911d315c17bf4b48bd22395ea8ead
 
-# Install extra package
-RUN apk --update add fping curl tar bash openjdk8-jre-base  &&\
+ENV ACTIVEMQ_HOME /opt/activemq
+
+RUN set -x && \
+    mkdir -p /opt && \
+    apk --update add --virtual build-dependencies curl && \
+    curl https://archive.apache.org/dist/activemq/$ACTIVEMQ_VERSION/$ACTIVEMQ-bin.tar.gz -o $ACTIVEMQ-bin.tar.gz
+
+# Validate checksum
+RUN if [ "$SHA512_VAL" != "$(sha512sum $ACTIVEMQ-bin.tar.gz | awk '{print($1)}')" ];\
+    then \
+        echo "sha512 values doesn't match! exiting."  && \
+        exit 1; \
+    fi;
+
+RUN tar xzf $ACTIVEMQ-bin.tar.gz -C  /opt && \
+    ln -s /opt/$ACTIVEMQ $ACTIVEMQ_HOME && \
+    addgroup -S activemq && adduser -S -H -G activemq -h $ACTIVEMQ_HOME activemq
+
+ADD lib/activemq-k8s-discovery-1.0.2-jar-with-dependencies.jar $ACTIVEMQ_HOME/lib/
+ADD conf/activemq.xml $ACTIVEMQ_HOME/conf/
+
+RUN chown -R activemq:activemq /opt/$ACTIVEMQ && \
+    chown -h activemq:activemq $ACTIVEMQ_HOME && \
+    apk del build-dependencies && \
     rm -rf /var/cache/apk/*
 
-# Install confd
-ENV CONFD_VERSION="0.14.0" \
-    CONFD_HOME="/opt/confd"
-RUN mkdir -p "${CONFD_HOME}/etc/conf.d" "${CONFD_HOME}/etc/templates" "${CONFD_HOME}/log" "${CONFD_HOME}/bin" &&\
-    curl -Lo "${CONFD_HOME}/bin/confd" "https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64" &&\
-    chmod +x "${CONFD_HOME}/bin/confd"
+USER activemq
 
-# Install s6-overlay
-RUN curl -sL https://github.com/just-containers/s6-overlay/releases/download/v1.19.1.1/s6-overlay-amd64.tar.gz \
-    | tar -zx -C /
+WORKDIR $ACTIVEMQ_HOME
+EXPOSE $ACTIVEMQ_TCP $ACTIVEMQ_AMQP $ACTIVEMQ_STOMP $ACTIVEMQ_MQTT $ACTIVEMQ_WS $ACTIVEMQ_UI
 
-RUN \
-    mkdir -p ${APP_HOME} /data /var/log/activemq  && \
-    curl http://apache.mirrors.ovh.net/ftp.apache.org/dist/activemq/${APP_VERSION}/apache-activemq-${APP_VERSION}-bin.tar.gz -o /tmp/activemq.tar.gz &&\
-    tar -xzf /tmp/activemq.tar.gz -C /tmp &&\
-    mv /tmp/apache-activemq-${APP_VERSION}/* ${APP_HOME} &&\
-    rm -rf /tmp/activemq.tar.gz &&\
-    addgroup -g ${GID} ${GROUP} && \
-    adduser -g "${USER} user" -D -h ${APP_HOME} -G ${GROUP} -s /bin/sh -u ${UID} ${USER}
-
-ADD lib/activemq-k8s-discovery-1.0.2-jar-with-dependencies.jar ${APP_HOME}/lib/
-ADD conf/activemq.xml ${APP_HOME}/conf/
-
-# ADD /root /
-RUN \
-    chown -R ${USER}:${GROUP} ${APP_HOME} &&\
-    chown -R ${USER}:${GROUP} /data &&\
-    chown -R ${USER}:${GROUP} /var/log/activemq
-
-# Expose all port
-EXPOSE 8161
-EXPOSE 61616
-EXPOSE 5672
-EXPOSE 61613
-EXPOSE 1883
-EXPOSE 61614
-
-VOLUME ["/data", "/var/log/activemq"]
-WORKDIR ${APP_HOME}
-CMD ["/init"]
+CMD ["/bin/sh", "-c", "bin/activemq console"]
